@@ -7,29 +7,34 @@ Deliver the functional backbone: identity, authorization, and foundational data 
 - [ ] Implement role-based access control with school-level isolation (`school_id` everywhere).
 - [ ] Integrate with third-party auth providers (Google, Microsoft) via OAuth/OIDC.
 - [ ] Harden session management, refresh tokens, and device trust policies.
+- [ ] Reference: [`phase-02/01-identity-access.md`](phase-02/01-identity-access.md)
 
 ## 2. Profile & Organization Management
 - [ ] Model schools, cohorts, mentors, and learners with relational integrity.
 - [ ] Create admin tooling for inviting staff, assigning cohorts, and managing permissions.
 - [ ] Support profile completion workflows (education, experience, skills, preferences).
+- [ ] Reference: [`phase-02/02-profile-organization.md`](phase-02/02-profile-organization.md)
 
 ## 3. Data Services
 - [ ] Stand up PostgreSQL schemas and migrations for user, application, and job data.
 - [ ] Configure Redis for caching session and analytics aggregates.
 - [ ] Provision Elasticsearch for job search indexing with ingestion pipeline from job boards.
 - [ ] Establish S3/Blob storage buckets for resume assets and reports.
+- [ ] Reference: [`phase-02/03-data-services.md`](phase-02/03-data-services.md)
 
 ## 4. APIs & Contracts
 - [ ] Define REST/GraphQL endpoints for auth, profiles, and job search primitives.
 - [ ] Generate OpenAPI/GraphQL schema documentation and publish via CI.
 - [ ] Implement API gateway request validation, rate limiting, and auditing.
 - [ ] Add service-to-service authentication and mutual TLS where required.
+- [ ] Reference: [`phase-02/04-apis-contracts.md`](phase-02/04-apis-contracts.md)
 
 ## 5. DevOps & Infrastructure
 - [ ] Write Kubernetes manifests or Helm charts for core services.
 - [ ] Configure Terraform modules for networking, databases, and secret stores per environment.
 - [ ] Automate container image publishing with GitHub Actions or container registry hooks.
 - [ ] Establish staging environment parity with production for safe testing.
+- [ ] Reference: [`phase-02/05-devops-infrastructure.md`](phase-02/05-devops-infrastructure.md)
 
 ## Exit Criteria
 - Authenticated users can manage their profiles within the correct school context.
