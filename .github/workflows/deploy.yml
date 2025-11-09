@@ -1,0 +1,106 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment to deploy"
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - staging
+          - production
+      image-tag:
+        description: "Container image tag (defaults to commit SHA)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  prepare:
+    name: Prepare Artifacts
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      image-tag: ${{ steps.image.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --non-interactive --prefer-offline
+
+      - name: Determine image tag
+        id: image
+        run: |
+          tag="${{ inputs.image-tag || github.sha }}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload deployment context
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-context
+          path: |
+            scripts/deployment/
+            infrastructure/
+            config/environment/
+            docker-compose.yml
+            package.json
+
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: prepare
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.DEPLOYMENT_DASHBOARD_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download deployment context
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-context
+          path: deployment
+
+      - name: Set up cloud credentials
+        if: ${{ inputs.environment != 'dev' }}
+        run: |
+          echo "Configure cloud credentials (placeholder)."
+          # Example: az login --service-principal ...
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy
+        run: |
+          chmod +x deployment/scripts/deployment/deploy.sh
+          deployment/scripts/deployment/deploy.sh "${{ inputs.environment }}"
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL || 'ghcr.io' }}
+          IMAGE_TAG: ${{ needs.prepare.outputs.image-tag }}
+          CLOUD_PROVIDER: ${{ vars.CLOUD_PROVIDER || 'azure' }}
+          DEPLOYMENT_STRATEGY: ${{ vars.DEPLOYMENT_STRATEGY || 'rolling' }}
+
+      - name: Post-deploy notification
+        if: ${{ always() }}
+        run: |
+          echo "Notify stakeholders about deployment result (placeholder)."
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+

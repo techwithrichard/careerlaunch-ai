@@ -45,21 +45,19 @@ The CI workflow runs on every pull request and on pushes to `main`. It performs 
   - `production`: requires business approval, mentor/school communication checklist, and post-deploy verification.
 - Capture deployment metadata (commit, operator, change request) and publish to the deployment timeline dashboard (see `docs/phases/phase-05/03-deployment-automation.md`).
 
-### Deployment Workflow Blueprint (Phase 02)
+### Deployment Workflow (`.github/workflows/deploy.yml`)
 
-1. **Build & Push Artifacts**  
-   - Docker images built in CI are tagged with commit SHA and stored in the registry.  
-   - Static bundles (web, extension, mobile assets) archived as build artifacts.
-2. **Promote**  
-   - `deploy.yaml` workflow consumes artifact references and applies Terraform/Kubernetes manifests.  
-   - Feature flags toggled per environment via scripted steps or LaunchDarkly API.
-3. **Verify**  
-   - Run smoke suites from `tests/e2e` against the target environment.  
-   - Execute database migrations within transaction-safe wrappers.  
-   - Notify on success/failure via Slack or Teams webhooks.
-4. **Observe & Rollback**  
-   - Post-deploy, monitor SLO dashboards (latency, error rate, job ingestion throughput).  
-   - Trigger automated rollback if health checks fail (see `docs/phases/phase-05/03-deployment-automation.md`).
+1. **Build & Prepare Artifacts**  
+   - Triggered manually with an `environment` input (`dev`, `staging`, `production`).  
+   - Checks out the repo, installs dependencies, and archives deployment context (scripts, infrastructure manifests, environment config).  
+   - Calculates the image tag (`workflow_dispatch` input or defaults to commit SHA).
+2. **Deploy**  
+   - Downloads the artifact bundle, configures cloud credentials (placeholder), and executes `scripts/deployment/deploy.sh <environment>`.  
+   - The shell script maps the environment to Kubernetes namespaces and echoes planned Terraform/Kubernetes operations until real commands are wired in.  
+   - Environment-level URLs (e.g., deployment dashboards) can be surfaced via GitHub environment variables.
+3. **Verify & Notify**  
+   - Post-deploy step reserved for smoke tests, SLO checks, and stakeholder notifications.  
+   - Replace placeholders with actual scripting as `tests/e2e` and monitoring hooks become available.
 
 ## Local Validation
 
