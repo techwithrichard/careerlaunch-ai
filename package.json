@@ -1,0 +1,14 @@
+{
+  "name": "careerlaunch-ai",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "workspaces": [
+    "src/backend/*",
+    "src/frontend/web-app"
+  ],
+  "scripts": {
+    "lint": "echo \"Linting not configured yet\"",
+    "test": "echo \"Test suite not implemented yet\"",
+    "typecheck": "echo \"Type checking not configured yet\""
+  }
+}
